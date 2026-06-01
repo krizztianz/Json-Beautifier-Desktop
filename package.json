@@ -1,7 +1,9 @@
 {
   "name": "json-beautifier-desktop",
-  "private": true,
-  "version": "0.1.0",
+  "author": "Kristian Andi (kristianandi33@gmail.com)",
+  "description": "A lightweight Electron desktop app for beautifying, minifying, and exploring JSON with an expandable tree viewer.",
+  "private": false,
+  "version": "0.2.1",
   "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
