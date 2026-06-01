@@ -1,5 +1,6 @@
 <script lang="ts">
   import { JSONEditor } from 'svelte-jsoneditor'
+  import JsonCodeEditor from './components/JsonCodeEditor.svelte'
   import { formatJson, isLikelyJsonPaste } from './lib/json-utils'
 
   let textValue = ''
@@ -30,9 +31,8 @@
     errorMessage = null
   }
 
-  function handleTextInput(event: Event) {
-    const target = event.target as HTMLTextAreaElement
-    textValue = target.value
+  function handleEditorChange(value: string) {
+    textValue = value
 
     const result = formatJson(textValue)
 
@@ -50,21 +50,19 @@
     errorMessage = textValue.trim() ? result.error : null
   }
 
-  function handlePaste(event: ClipboardEvent) {
-    const pastedText = event.clipboardData?.getData('text')
-
-    if (!pastedText || !isLikelyJsonPaste(pastedText)) {
-      return
+  function handleEditorPaste(pastedText: string) {
+    if (!isLikelyJsonPaste(pastedText)) {
+      return false
     }
 
     const result = formatJson(pastedText)
 
     if (!result.ok) {
-      return
+      return false
     }
 
-    event.preventDefault()
     applyJsonText(pastedText, true)
+    return true
   }
 
   function beautify() {
@@ -152,13 +150,14 @@
         {/if}
       </div>
 
-      <textarea
-        bind:value={textValue}
-        on:input={handleTextInput}
-        on:paste={handlePaste}
-        spellcheck="false"
-        placeholder="Paste your JSON here..."
-      ></textarea>
+      <div class="code-editor-container">
+        <JsonCodeEditor
+          value={textValue}
+          placeholder="Paste your JSON here..."
+          onChange={handleEditorChange}
+          onPasteJson={handleEditorPaste}
+        />
+      </div>
 
       {#if errorMessage}
         <div class="error-box">
@@ -183,22 +182,22 @@
   </main>
 
   <footer class="status-bar">
-  <span>
-    {#if status === 'valid'}
-      JSON is valid
-    {:else if status === 'invalid'}
-      JSON has syntax error
-    {:else}
-      Ready
-    {/if}
-  </span>
+    <span>
+      {#if status === 'valid'}
+        JSON is valid
+      {:else if status === 'invalid'}
+        JSON has syntax error
+      {:else}
+        Ready
+      {/if}
+    </span>
 
-  <span class="copyright">
-    Copyright © 2026 - Kristian Andi
-  </span>
+    <span class="copyright">
+      Copyright © 2026 - Kristian Andi
+    </span>
 
-  <span>{textValue.length} chars</span>
-</footer>
+    <span>{textValue.length} chars</span>
+  </footer>
 </div>
 
 <style>
@@ -339,23 +338,11 @@
     color: #64748b;
   }
 
-  textarea {
+  .code-editor-container {
     flex: 1 1 auto;
     min-height: 0;
-    width: 100%;
-    resize: none;
-    border: none;
-    outline: none;
-    padding: 14px;
+    overflow: hidden;
     background: #020617;
-    color: #e2e8f0;
-    font-family: "Cascadia Code", Consolas, Monaco, monospace;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  textarea::placeholder {
-    color: #475569;
   }
 
   .error-box {
